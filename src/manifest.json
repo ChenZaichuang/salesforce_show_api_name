@@ -1,0 +1,57 @@
+{
+  "name": "Show Salesforce Api Name",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "Show object/field api name on detail pages",
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "icons":
+  {
+    "16": "images/16.jpg",
+    "32": "images/32.jpg",
+    "48": "images/48.jpg",
+    "128": "images/128.jpg"
+  },
+  "browser_action": {
+    "default_icon": {
+      "16": "images/16.jpg",
+      "32": "images/32.jpg",
+      "48": "images/48.jpg",
+      "128": "images/128.jpg"
+    },
+    "default_title": "Show Salesforce Api Name"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.force.com/*",
+        "https://*.salesforce.com/*"
+      ],
+      "js": [
+        "content_script.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  "permissions": [
+    "activeTab",
+    "cookies",
+    "https://*.force.com/*",
+    "https://*.salesforce.com/*"
+  ],
+  "commands": {
+    "showApiName": {
+      "suggested_key": {
+        "windows": "Alt+Shift+Z",
+        "mac": "MacCtrl+Ctrl+Z",
+        "linux": "Alt+Shift+Z",
+        "chromeos": "Alt+Shift+Z"
+      },
+      "description": "Show Api Name"
+    }
+  }
+}
