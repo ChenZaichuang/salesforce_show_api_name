@@ -30,14 +30,12 @@ function addFieldAPIName(fieldClass, filter, getFieldFunc, labelMap) {
     })
 }
 
-
 async function replaceWithAPINames(isLightningMode, sObjectName, labelMap) {
 
     window.showAPINameScript = window.showAPINameScript || {};
-    window.showAPINameScript.isOn = !!window.showAPINameScript.isOn;
+    window.showAPINameScript.isOn = window.showAPINameScript.isOn === undefined ? false : !window.showAPINameScript.isOn;
 
     if (!window.showAPINameScript.isOn) {
-        window.showAPINameScript.isOn = !window.showAPINameScript.isOn;
         if (isLightningMode) {
             addFieldAPIName('.test-id__field-label-container.slds-form-element__label', el => {return el.childNodes.length > 0}, el => {return el.childNodes[0].innerText}, labelMap);
             addObjectAPIName('.entityNameTitle.slds-line-height_reset', sObjectName);
