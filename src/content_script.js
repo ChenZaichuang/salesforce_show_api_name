@@ -1,61 +1,49 @@
 'use strict';
 
+function appendAPINameToElement(el, apiName) {
+    let apiElement = document.createElement('span');
+    apiElement.style = 'display: block;font-weight: normal;color: #A9A9A9;margin-top: 3px;margin-bottom: 5px;';
+    apiElement.textContent = apiName;
+    apiElement.className = "apinames-script-class";
+    el.appendChild(apiElement);
+}
+
+function addObjectAPIName(objectClass, objectAPIName) {
+    let objectLabelElements = document.querySelectorAll(objectClass);
+    if (objectLabelElements.length > 0) {
+        let objectLabelElement = objectLabelElements[objectLabelElements.length - 1];
+        appendAPINameToElement(objectLabelElement, objectAPIName);
+    }
+}
+
+function addFieldAPIName(fieldClass, filter, getFieldFunc, labelMap) {
+    let fieldElements = document.querySelectorAll(fieldClass);
+    Array.prototype.map.call(fieldElements, el => {
+        if (filter(el)) {
+            let fieldLabel = getFieldFunc(el);
+            if (labelMap[fieldLabel] != null) {
+                appendAPINameToElement(el, labelMap[fieldLabel]);
+            } else if (fieldLabel.toLowerCase().includes('currency')) {
+                appendAPINameToElement(el, 'CurrencyIsoCode');
+            }
+        }
+    })
+}
+
 
 async function replaceWithAPINames(isLightningMode, sObjectName, labelMap) {
 
-    window.apinamesScript = window.apinamesScript || {};
-    window.apinamesScript.isOn = !!window.apinamesScript.isOn;
+    window.showAPINameScript = window.showAPINameScript || {};
+    window.showAPINameScript.isOn = !!window.showAPINameScript.isOn;
 
-    if (!window.apinamesScript.isOn) {
-
+    if (!window.showAPINameScript.isOn) {
+        window.showAPINameScript.isOn = !window.showAPINameScript.isOn;
         if (isLightningMode) {
-            let fieldElements = document.querySelectorAll('.test-id__field-label-container.slds-form-element__label');
-            Array.prototype.map.call(fieldElements, el => {
-                if (el.childNodes.length > 0) {
-                    let fieldLabel = el.childNodes[0].innerText;
-                    let apiName;
-                    if (labelMap[fieldLabel] != null) {
-                        apiName = labelMap[fieldLabel];
-                    } else if (fieldLabel.toLowerCase().includes('currency')) {
-                        apiName = 'CurrencyIsoCode';
-                    }
-                    let apiNameElement = document.createElement('span');
-                    apiNameElement.style = 'display: block;font-weight: normal;color: #A9A9A9;margin-top: 3px;margin-bottom: 5px;';
-                    apiNameElement.textContent = apiName;
-                    apiNameElement.className = "apinames-script-class";
-                    el.appendChild(apiNameElement);
-                }
-            });
-            let objectLabelElements = document.querySelectorAll('.entityNameTitle.slds-line-height_reset');
-            let objectLabelElement = objectLabelElements[objectLabelElements.length - 1];
-            let objectNameElement = document.createElement('span');
-            objectNameElement.style = 'display: block;font-weight: normal;color: #A9A9A9;margin-top: 3px;margin-bottom: 5px;';
-            objectNameElement.textContent = sObjectName;
-            objectNameElement.className = "apinames-script-class";
-            objectLabelElement.appendChild(objectNameElement);
+            addFieldAPIName('.test-id__field-label-container.slds-form-element__label', el => {return el.childNodes.length > 0}, el => {return el.childNodes[0].innerText}, labelMap);
+            addObjectAPIName('.entityNameTitle.slds-line-height_reset', sObjectName);
         } else {
-            let fieldElements = document.querySelectorAll('.labelCol');
-            Array.prototype.map.call(fieldElements, el => {
-                let fieldLabel = el.textContent.split('sfdcPage.')[0];
-                let apiName;
-                if (labelMap[fieldLabel] != null) {
-                    apiName = labelMap[fieldLabel];
-                } else if (fieldLabel.toLowerCase().includes('currency')) {
-                    apiName = 'CurrencyIsoCode';
-                }
-                let apiNameElement = document.createElement('span');
-                apiNameElement.style = 'display: block;font-weight: normal;color: #A9A9A9;margin-top: 3px;margin-bottom: 5px;';
-                apiNameElement.textContent = apiName;
-                apiNameElement.className = "apinames-script-class";
-                el.appendChild(apiNameElement);
-            });
-            let objectLabelElement = document.querySelectorAll('.pageType')[0];
-            let objectNameElement = document.createElement('span');
-            objectNameElement.style = 'display: block;font-weight: normal;color: #A9A9A9;margin-top: 3px;margin-bottom: 5px;';
-            objectNameElement.textContent = sObjectName;
-            objectNameElement.className = "apinames-script-class";
-            objectLabelElement.appendChild(objectNameElement);
-
+            addFieldAPIName('.labelCol', _ => {return true}, el => {return el.textContent.split('sfdcPage.')[0]}, labelMap);
+            addObjectAPIName('.pageType', sObjectName);
         }
     } else {
         let els = document.querySelectorAll('.apinames-script-class');
@@ -63,13 +51,12 @@ async function replaceWithAPINames(isLightningMode, sObjectName, labelMap) {
             el.parentNode.removeChild(el);
         });
     }
-    window.apinamesScript.isOn = !window.apinamesScript.isOn;
 }
 
 chrome.runtime.onMessage.addListener(function (message) {
     switch (message.command) {
         case "showApiName":
-            replaceWithAPINames(message.isLightningMode, message.sObjectName, message.labelMap).then(res => console.log(res)).catch(res => console.log(res));
+            replaceWithAPINames(message.isLightningMode, message.sObjectName, message.labelMap).then(res => {}).catch(res => console.log(res));
             break;
     }
 });
