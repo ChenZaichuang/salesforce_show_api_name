@@ -38,7 +38,7 @@ async function replaceWithAPINames(isLightningMode, sObjectName, labelMap) {
     if (!window.showAPINameScript.isOn) {
         if (isLightningMode) {
             addFieldAPIName('.test-id__field-label-container.slds-form-element__label', el => {return el.childNodes.length > 0}, el => {return el.childNodes[0].innerText}, labelMap);
-            addObjectAPIName('.entityNameTitle.slds-line-height_reset', sObjectName);
+            addObjectAPIName('.entityNameTitle', sObjectName);
         } else {
             addFieldAPIName('.labelCol', _ => {return true}, el => {return el.textContent.split('sfdcPage.')[0]}, labelMap);
             addObjectAPIName('.pageType', sObjectName);
