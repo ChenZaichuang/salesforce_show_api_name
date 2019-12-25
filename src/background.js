@@ -46,6 +46,26 @@ async function getSid(url) {
     })
 }
 
+function getLongId(originalId) {
+    if (originalId.length < 15) {
+        return "";
+    } else {
+        originalId = originalId.substring(0, 15)
+    }
+
+    let addon = "";
+    for (var block = 0; block < 3; block++) {
+        var loop = 0;
+        for (var position = 0; position < 5; position++) {
+            var current = originalId.charAt(block * 5 + position);
+            if (current >= "A" && current <= "Z")
+                loop += 1 << position;
+        }
+        addon += "ABCDEFGHIJKLMNOPQRSTUVWXYZ012345".charAt(loop);
+    }
+    return originalId + addon;
+}
+
 async function showApiName(tab) {
 
     let urlMatchResult = tab.url.match(/(https:\/\/[^/]+)(.+)/);
@@ -82,7 +102,8 @@ async function showApiName(tab) {
         command: "showApiName",
         isLightningMode: isLightningMode,
         labelMap: labelMap,
-        sObjectName: sObjectName
+        sObjectName: sObjectName,
+        longId: getLongId(sObjectId)
     });
 }
 
