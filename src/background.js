@@ -38,11 +38,30 @@ async function getSObjectName(host, headers, keyPrefix) {
     });
 }
 
-async function getSid(url) {
+async function getTokenAndDomainInClassic(url) {
     return new Promise((resolve, reject) => {
         chrome.cookies.getAll({"url": url, "name": "sid"}, function (cookies) {
-            resolve(cookies[0].value);
+            resolve([cookies[0].value, cookies[0].domain]);
         });
+    })
+}
+
+async function getTokenAndDomainInLightning(url, customDomain) {
+    return new Promise((resolve, reject) => {
+        chrome.cookies.getAll({"domain": "salesforce.com", "name": "sid"}, function (cookies) {
+            resolve(cookies);
+        });
+    }).then(cookies => {
+        let token = "";
+        let domain = "";
+        for(let cookie of cookies){
+            if (cookie.domain.startsWith(customDomain + ".")){
+                token = cookie.value;
+                domain = cookie.domain;
+                break;
+            }
+        }
+        return [token, domain];
     })
 }
 
@@ -67,36 +86,40 @@ function getLongId(originalId) {
 }
 
 async function showApiName(tab) {
-
-    let urlMatchResult = tab.url.match(/(https:\/\/[^/]+)(.+)/);
-    let host = urlMatchResult[1];
-    let path = urlMatchResult[2];
-    let isLightningMode = host.includes("lightning");
+    const url = new URL(tab.url)
+    let protocol = url.protocol;
+    let host = url.host;
+    let path = url.pathname;
+    let isLightningMode = host.includes("lightning.force.com");
     let matchResult;
+    let sid, domain;
     if (isLightningMode) {
         matchResult = path.match(/\/lightning\/r\/(\w+)\/(\w+)\W*/);
         if (!matchResult) {
             return;
         }
+        let customDomain = host.substring(0, host.indexOf(".lightning.force.com"));
+        [sid, domain] = await getTokenAndDomainInLightning(protocol + '//' + host, customDomain);
     } else {
         if (!path.match(/\/\w{15,18}/)) {
             return;
         }
+        [sid, domain] = await getTokenAndDomainInClassic(protocol + '//' + host, "");
     }
     let sObjectId;
     let sObjectName;
-    host = host.endsWith(".lightning.force.com") ? host.replace('.lightning.force.com', '.my.salesforce.com') : host;
-    let sid = await getSid(host);
+
+    let apiHost = protocol + '//' + (isLightningMode ? domain : host)
     let headers = {"Authorization": `Bearer ${sid}`, "Content-Type": "application/json"};
     if (isLightningMode) {
         sObjectId = matchResult[2];
         sObjectName = matchResult[1];
     } else {
         sObjectId = path.substring(1, 16);
-        sObjectName = await getSObjectName(host, headers, path.substring(1, 4));
+        sObjectName = await getSObjectName(apiHost, headers, path.substring(1, 4));
     }
 
-    let labelMap = await getLabelMap(host, sObjectName, sObjectId, headers);
+    let labelMap = await getLabelMap(apiHost, sObjectName, sObjectId, headers);
 
     await chrome.tabs.sendMessage(tab.id, {
         command: "showApiName",
