@@ -1,19 +1,33 @@
 'use strict';
 
-function appendSpanToElement(el, content) {
+function appendSpanToElement(el, content, toBelow) {
     let apiElement = document.createElement('span');
-    apiElement.style = 'display: block;font-weight: normal;color: #A9A9A9;margin-top: 3px;margin-bottom: 5px;';
     apiElement.textContent = content;
-    apiElement.className = "apinames-script-class";
+    if (toBelow) {
+        apiElement.className = "apinames-script-class";
+        apiElement.style = 'display: block;font-weight: normal;color: #A9A9A9;margin-top: 3px;margin-bottom: 5px;';
+    } else {
+        apiElement.style = 'display: inline-table; margin-left: 1rem';
+    }
     el.appendChild(apiElement);
+}
+
+function appendSpansToElement(el, contentArray) {
+    let divElement = document.createElement('div');
+    divElement.style = 'position: absolute; display: inline-block; font-weight: normal;color: #A9A9A9;';
+    divElement.className = "apinames-script-class";
+    for (let content of contentArray) {
+        appendSpanToElement(divElement, content, false);
+    }
+    el.style.position = 'relative';
+    el.appendChild(divElement);
 }
 
 function addObjectAPIName(objectClass, objectAPIName, longId) {
     let objectLabelElements = document.querySelectorAll(objectClass);
     if (objectLabelElements.length > 0) {
         let objectLabelElement = objectLabelElements[objectLabelElements.length - 1];
-        appendSpanToElement(objectLabelElement, objectAPIName);
-        appendSpanToElement(objectLabelElement, longId);
+        appendSpansToElement(objectLabelElement, [objectAPIName, longId])
     }
 }
 
@@ -23,9 +37,9 @@ function addFieldAPIName(fieldClass, filter, getFieldFunc, labelMap) {
         if (filter(el)) {
             let fieldLabel = getFieldFunc(el);
             if (labelMap[fieldLabel] != null) {
-                appendSpanToElement(el, labelMap[fieldLabel]);
+                appendSpanToElement(el, labelMap[fieldLabel], true);
             } else if (fieldLabel.toLowerCase().includes('currency')) {
-                appendSpanToElement(el, 'CurrencyIsoCode');
+                appendSpanToElement(el, 'CurrencyIsoCode', true);
             }
         }
     })
