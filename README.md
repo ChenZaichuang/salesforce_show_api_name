@@ -14,9 +14,9 @@ This repo is a chrome extension to show field and object api name on record deta
 |  OS   | Shortcut  |
 |  :----:  | :----:  |
 | MacOs  | control + command + Z |
-| Windows  | control + shift + Z |
-| Linux  | control + shift + Z |
-| ChromeOs  | control + shift + Z |
+| Windows  | alt + shift + Z |
+| Linux  | alt + shift + Z |
+| ChromeOs  | alt + shift + Z |
 
 #### Feedback
 I appreciate to receive any feedbacks or pull requests, you can leave your comments in this repo or in the extension homepage or mail to 1158400735@qq.com with any suggestions.
