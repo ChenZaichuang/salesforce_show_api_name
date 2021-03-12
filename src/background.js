@@ -7,18 +7,45 @@ async function toJson(response) {
 async function getLabelMap(host, sObjectName, sObjectId, headers) {
     return await fetch(host + '/services/data/v37.0/sobjects/' + sObjectName + '/' + sObjectId, {headers: headers}).then(toJson).then(async data => {
         let recordTypeId = data.RecordTypeId || '012000000000000AAA';
-        return await fetch(host + '/services/data/v37.0/sobjects/' + sObjectName + '/describe/layouts/' + recordTypeId, {headers: headers}).then(toJson).then(data => {
+        let labelMap = await fetch(host + '/services/data/v37.0/sobjects/' + sObjectName + '/describe/layouts/' + recordTypeId, {headers: headers}).then(toJson).then(data => {
             data = data.layouts != null ? data.layouts[0] : data;
             let labelMap = {};
+            let labelShowTimes = {};
             data.detailLayoutSections.map(section => {
                 section.layoutRows.map(row => {
                     row.layoutItems.filter(item => !item.placeHolder).map(item => {
-                        labelMap[item.label] = item.layoutComponents[0] && item.layoutComponents[0].value;
+                        labelShowTimes[item.label] = labelShowTimes[item.label] !== undefined ? labelShowTimes[item.label] + 1 : 0;
+                        let m = labelMap[item.label] ? labelMap[item.label] : {};
+                        m[labelShowTimes[item.label]] = item.layoutComponents[0] && item.layoutComponents[0].value;
+                        labelMap[item.label] = m;
                     })
                 })
             });
             return labelMap;
-        })
+        });
+
+        let assistLabelMap = await fetch(host + '/services/data/v37.0/sobjects/' + sObjectName + '/describe', {headers: headers}).then(toJson).then(data => {
+            let assistLabelMap = {};
+            data.fields.map(field => {
+                if (labelMap[field.label] === undefined) {
+                    assistLabelMap[field.label] = field.name;
+                }
+            });
+
+            if (sObjectName === 'User') {
+                assistLabelMap['Debug Mode'] = 'UserPreferencesUserDebugModePref';
+                assistLabelMap['Delegated Approver'] = 'DelegatedApproverId';
+                assistLabelMap['Individual'] = 'IndividualId';
+                assistLabelMap['Failed Login Attempts'] = 'NumberOfFailedLogins';
+                assistLabelMap['Cache Diagnostics'] = 'UserPreferencesCacheDiagnostics';
+                assistLabelMap['Development Mode'] = 'UserPreferencesApexPagesDeveloperMode';
+                assistLabelMap['Modified By'] = 'LastModifiedById';
+            }
+
+            return assistLabelMap;
+        });
+
+        return {labelMap: labelMap, assistLabelMap: assistLabelMap};
     })
 }
 

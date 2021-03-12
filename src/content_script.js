@@ -33,13 +33,15 @@ function addObjectAPIName(objectClass, objectAPIName, longId) {
 
 function addFieldAPIName(fieldClass, filter, getFieldFunc, labelMap) {
     let fieldElements = document.querySelectorAll(fieldClass);
+    let labelShowTimes = {};
     Array.prototype.map.call(fieldElements, el => {
         if (filter(el)) {
             let fieldLabel = getFieldFunc(el);
-            if (labelMap[fieldLabel] != null) {
-                appendSpanToElement(el, labelMap[fieldLabel], true);
-            } else if (fieldLabel.toLowerCase().includes('currency')) {
-                appendSpanToElement(el, 'CurrencyIsoCode', true);
+            if (labelMap.labelMap[fieldLabel] != null) {
+                labelShowTimes[fieldLabel] = labelShowTimes[fieldLabel] !== undefined ? labelShowTimes[fieldLabel] + 1 : 0;
+                appendSpanToElement(el, labelMap.labelMap[fieldLabel][labelShowTimes[fieldLabel]], true);
+            } else if (labelMap.assistLabelMap[fieldLabel] != null) {
+                appendSpanToElement(el, labelMap.assistLabelMap[fieldLabel], true);
             }
         }
     })
