@@ -42,6 +42,8 @@ function addFieldAPIName(fieldClass, filter, getFieldFunc, labelMap) {
                 appendSpanToElement(el, labelMap.labelMap[fieldLabel][labelShowTimes[fieldLabel]], true);
             } else if (labelMap.assistLabelMap[fieldLabel] != null) {
                 appendSpanToElement(el, labelMap.assistLabelMap[fieldLabel], true);
+            } else if (fieldLabel.toLowerCase().includes('currency')) {
+                appendSpanToElement(el, 'CurrencyIsoCode', true);
             }
         }
     })

@@ -1,6 +1,6 @@
 {
   "name": "Salesforce Show Api Name",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "manifest_version": 2,
   "description": "Display Field & Object API Names on Detail Pages (LEX & Classic).",
   "homepage_url": "https://github.com/ChenZaichuang/salesforce_show_api_name",
