@@ -1,6 +1,6 @@
 'use strict';
 
-const CURRENT_VERSION = '1.0.0';
+const CURRENT_VERSION = '2.0.0';
 
 const STORAGE_KEYS = {
     VERSION: 'apinames_version'
@@ -131,7 +131,7 @@ const tipsPopup = (() => {
         popup.innerHTML = `
         <div class="apinames-tips-popup-header">
             <img src="${EXTENSION_ICON_BASE64}" class="apinames-tips-popup-icon" alt="Extension icon">
-            <div class="apinames-tips-popup-title">API Name Helper</div>
+            <div class="apinames-tips-popup-title">Salesforce Show API Name V2.0.0</div>
         </div>
         
         <div class="apinames-tips-popup-content">
@@ -204,6 +204,7 @@ const COPY_ICON_SVG = `
 
 // Update the APINAMES_STYLES with Salesforce-like styling
 const APINAMES_STYLES = `
+  /* Base styles for both modes */
   .apinames-copy-btn {
     display: inline-flex;
     align-items: center;
@@ -218,41 +219,63 @@ const APINAMES_STYLES = `
     padding: 0;
     vertical-align: middle;
     box-shadow: 0 1px 1px rgba(0,0,0,0.05);
-  }
-
-  .lightning-mode .apinames-copy-btn {
-    background-color: #f3f2f2 !important;
-    border-color: #c9c7c5 !important;
-    color: #706e6b !important;
-  }
-
-  .lightning-mode .apinames-copy-btn:hover {
-    background-color: #eef4ff !important;
-    border-color: #1b96ff !important;
-    color: #0176d3 !important;
-  }
-
-  .lightning-mode .apinames-copy-btn:active {
-    background-color: #e1f0ff !important;
-    border-color: #0176d3 !important;
-  }
-
-  .apinames-copy-btn {
     background-color: #ffffff;
     color: #706e6b;
-  }
-
-  .apinames-multi-selected,
-  .apinames-query-selected {
-    background-color: #eef4ff !important;
-    border-color: #1b96ff !important;
-    color: #0176d3 !important;
   }
 
   .apinames-copy-btn svg {
     width: 0.75rem;
     height: 0.75rem;
     pointer-events: none;
+  }
+
+  /* Lightning mode specific styles */
+  .lightning-mode .apinames-copy-btn {
+    background-color: #f3f2f2;
+    border-color: #c9c7c5;
+    color: #706e6b;
+  }
+
+  .lightning-mode .apinames-copy-btn:hover {
+    background-color: #eef4ff;
+    border-color: #1b96ff;
+    color: #0176d3;
+  }
+
+  .lightning-mode .apinames-copy-btn:active {
+    background-color: #e1f0ff;
+    border-color: #0176d3;
+  }
+
+  /* Classic mode specific styles */
+  .classic-mode .apinames-copy-btn {
+    background-color: #f8f8f8;
+    border-color: #c0c0c0;
+    color: #333333;
+  }
+
+  .classic-mode .apinames-copy-btn:hover {
+    background-color: #e6f2fb;
+    border-color: #7eb4dd;
+    color: #015ba7;
+  }
+
+  /* Selected state styles for both modes */
+  .apinames-multi-selected,
+  .apinames-query-selected {
+    background-color: #e1f0ff !important;
+    border-color: #0176d3 !important;
+    color: #0176d3 !important;
+  }
+
+  .lightning-mode .apinames-multi-selected,
+  .lightning-mode .apinames-query-selected {
+    box-shadow: 0 0 0 1px #0176d3 !important;
+  }
+
+  .classic-mode .apinames-multi-selected,
+  .classic-mode .apinames-query-selected {
+    box-shadow: 0 0 0 1px #015ba7 !important;
   }
 `;
 
@@ -363,7 +386,7 @@ const copyManager = (() => {
             ? state.queryItems.filter(v => v !== apiName)
             : [...state.queryItems, apiName];
 
-        await generateSOQL(sObjectName); // Ensure completion
+        await generateSOQL(sObjectName);
         state.lastAction = 'query';
     };
 
@@ -617,6 +640,10 @@ const apiNameManager = (() => {
 
     // In the injectApiNames function, add the lightning mode class to body
     const injectApiNames = (fieldSelector, objectSelector, sObjectName, labelMap, longId, isLightning) => {
+        // Remove any existing mode classes
+        document.body.classList.remove('lightning-mode', 'classic-mode');
+
+        // Add the appropriate mode class
         if (isLightning) {
             document.body.classList.add('lightning-mode');
             processFields(fieldSelector,
@@ -625,7 +652,7 @@ const apiNameManager = (() => {
                 labelMap
             );
         } else {
-            document.body.classList.remove('lightning-mode');
+            document.body.classList.add('classic-mode');
             processFields(fieldSelector,
                 () => true,
                 el => el.textContent.split('sfdcPage.')[0],
