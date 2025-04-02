@@ -54,13 +54,17 @@ function findApiName(label, counts, { labelMap, assistLabelMap }) {
     return null;
 }
 
-async function toggleAPIDisplay(isLightning, sObjectName, labelMap, longId) {
-    window.showAPINameScript = window.showAPINameScript || { isOn: false };
+function isAPINameVisible() {
+    return document.querySelector('.apinames-script-element') !== null;
+}
 
-    const elements = document.querySelectorAll('.apinames-script-element, .apinames-script-container');
-    if (window.showAPINameScript.isOn) {
-        elements.forEach(el => el.remove());
+function toggleAPIDisplay(isLightning, sObjectName, labelMap, longId) {
+    if (isAPINameVisible()) {
+        // Remove all API name elements if they exist
+        document.querySelectorAll('.apinames-script-element, .apinames-script-container')
+            .forEach(el => el.remove());
     } else {
+        // Add API names if they don't exist
         if (isLightning) {
             addFieldAPIName(
                 '.test-id__field-label-container.slds-form-element__label',
@@ -79,7 +83,6 @@ async function toggleAPIDisplay(isLightning, sObjectName, labelMap, longId) {
             addObjectAPIName('.pageType', sObjectName, longId);
         }
     }
-    window.showAPINameScript.isOn = !window.showAPINameScript.isOn;
 }
 
 chrome.runtime.onMessage.addListener((message) => {
