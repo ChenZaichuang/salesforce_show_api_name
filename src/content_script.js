@@ -1,14 +1,11 @@
 'use strict';
 
-// User Guide Popup
-// Add to Constants Definition section
+const CURRENT_VERSION = '1.0.0';
+
 const STORAGE_KEYS = {
-    FIRST_RUN: 'apinames_first_run'
+    VERSION: 'apinames_version'
 };
 
-// Add to Style Management section (add these styles to APINAMES_STYLES)
-// Update the TIPS_POPUP_STYLES in Constants Definition section
-// Update the TIPS_POPUP_STYLES
 const TIPS_POPUP_STYLES = `
   .apinames-tips-popup {
     position: fixed;
@@ -115,23 +112,20 @@ const TIPS_POPUP_STYLES = `
 
 const EXTENSION_ICON_BASE64 = 'data:image/png;base64,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'; // <-- Add your base64 encoded icon here
 
-// Update the tipsPopup component
 const tipsPopup = (() => {
-    const showIfFirstRun = () => {
-        chrome.storage.sync.get([STORAGE_KEYS.FIRST_RUN], (result) => {
-            if (result[STORAGE_KEYS.FIRST_RUN] === undefined) {
+    const checkVersionAndShow = () => {
+        chrome.storage.sync.get([STORAGE_KEYS.VERSION], (result) => {
+            if (result[STORAGE_KEYS.VERSION] !== CURRENT_VERSION) {
                 show();
-                chrome.storage.sync.set({ [STORAGE_KEYS.FIRST_RUN]: false });
+                chrome.storage.sync.set({[STORAGE_KEYS.VERSION]: CURRENT_VERSION});
             }
         });
     };
 
     const show = () => {
-        // Create overlay
         const overlay = document.createElement('div');
         overlay.className = 'apinames-tips-popup-overlay';
 
-        // Create popup
         const popup = document.createElement('div');
         popup.className = 'apinames-tips-popup';
         popup.innerHTML = `
@@ -157,7 +151,6 @@ const tipsPopup = (() => {
         </div>
     `;
 
-        // Close handler
         const closePopup = () => {
             popup.style.animation = 'popup-fadeIn 0.3s ease-out reverse';
             overlay.style.animation = 'overlay-fadeIn 0.3s ease-out reverse';
@@ -175,7 +168,7 @@ const tipsPopup = (() => {
         document.body.appendChild(popup);
     };
 
-    return { showIfFirstRun };
+    return { checkVersionAndShow };
 })();
 
 // ==================== Constants Definition ====================
@@ -211,7 +204,6 @@ const COPY_ICON_SVG = `
 
 // Update the APINAMES_STYLES with Salesforce-like styling
 const APINAMES_STYLES = `
-  /* 基础按钮样式 */
   .apinames-copy-btn {
     display: inline-flex;
     align-items: center;
@@ -228,11 +220,10 @@ const APINAMES_STYLES = `
     box-shadow: 0 1px 1px rgba(0,0,0,0.05);
   }
 
-  /* Lightning模式特定调整 */
   .lightning-mode .apinames-copy-btn {
-    background-color: #f3f2f2 !important; /* 使用浅灰色替代白色 */
+    background-color: #f3f2f2 !important;
     border-color: #c9c7c5 !important;
-    color: #706e6b !important; /* 默认图标颜色 */
+    color: #706e6b !important;
   }
 
   .lightning-mode .apinames-copy-btn:hover {
@@ -246,13 +237,11 @@ const APINAMES_STYLES = `
     border-color: #0176d3 !important;
   }
 
-  /* 经典模式样式保持不变 */
   .apinames-copy-btn {
     background-color: #ffffff;
     color: #706e6b;
   }
 
-  /* 选中状态增强 */
   .apinames-multi-selected,
   .apinames-query-selected {
     background-color: #eef4ff !important;
@@ -260,11 +249,10 @@ const APINAMES_STYLES = `
     color: #0176d3 !important;
   }
 
-  /* 图标大小调整 */
   .apinames-copy-btn svg {
     width: 0.75rem;
     height: 0.75rem;
-    pointer-events: none; /* 防止图标干扰点击 */
+    pointer-events: none;
   }
 `;
 
@@ -534,6 +522,13 @@ const utils = {
 
 // ==================== Main Logic ====================
 const apiNameManager = (() => {
+    const init = () => {
+        styleManager.injectStyles();
+        chrome.runtime.onMessage.addListener(handleMessage);
+        document.addEventListener('keyup', handleKeyUp);
+        tipsPopup.checkVersionAndShow();
+    };
+
     const processFields = (selector, filter, labelExtractor, labelMap) => {
         const elements = document.querySelectorAll(selector);
         const labelCounts = {};
@@ -638,13 +633,6 @@ const apiNameManager = (() => {
             );
         }
         addObjectApiName(objectSelector, sObjectName, longId);
-    };
-
-    const init = () => {
-        styleManager.injectStyles();
-        chrome.runtime.onMessage.addListener(handleMessage);
-        document.addEventListener('keyup', handleKeyUp);
-        tipsPopup.showIfFirstRun(); // Add this line
     };
 
     return { init };
