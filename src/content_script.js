@@ -1,6 +1,6 @@
 'use strict';
 
-// ==================== 常量定义 ====================
+// ==================== Constants Definition ====================
 const SELECTORS = {
     LIGHTNING: {
         FIELD_LABEL: '.test-id__field-label-container.slds-form-element__label',
@@ -61,10 +61,10 @@ const APINAMES_STYLES = `
     opacity: 0.7;
     transition: all 0.2s;
   }
-  /* 其他样式保持原有内容 */
+  /* Other styles remain unchanged */
 `;
 
-// ==================== 样式管理 ====================
+// ==================== Style Management ====================
 const styleManager = (() => {
     const injectStyles = () => {
         if (!document.getElementById('apinames-styles')) {
@@ -78,7 +78,7 @@ const styleManager = (() => {
     return { injectStyles };
 })();
 
-// ==================== Toast 管理 ====================
+// ==================== Toast Management ====================
 const toastManager = (() => {
     const show = (message) => {
         removeExistingToast();
@@ -132,7 +132,7 @@ const toastManager = (() => {
     return { show };
 })();
 
-// ==================== 复制管理 ====================
+// ==================== Copy Management ====================
 const copyManager = (() => {
     let state = {
         multiItems: [],
@@ -140,9 +140,9 @@ const copyManager = (() => {
         lastAction: null
     };
 
-    let currentSObjectName = 'UnknownObject'; // 新增存储
+    let currentSObjectName = 'UnknownObject'; // Store current object name
 
-    const init = (sObjectName) => { // 新增初始化方法
+    const init = (sObjectName) => {
         currentSObjectName = sObjectName;
     };
 
@@ -170,7 +170,7 @@ const copyManager = (() => {
             ? state.queryItems.filter(v => v !== apiName)
             : [...state.queryItems, apiName];
 
-        await generateSOQL(sObjectName); // 确保等待完成
+        await generateSOQL(sObjectName); // Ensure completion
         state.lastAction = 'query';
     };
 
@@ -187,10 +187,10 @@ const copyManager = (() => {
         state.lastAction = 'multi';
     };
 
-    const singleCopy = (apiName, event) => { // ✅ 接收 event 参数
+    const singleCopy = (apiName, event) => {
         navigator.clipboard.writeText(apiName).then(() => {
             toastManager.show(`Copied: ${apiName}`);
-            flashButton(event.target); // ✅ 现在 event 已定义
+            flashButton(event.target);
             resetState();
         }).catch(err => {
             console.error('Copy failed:', err);
@@ -205,10 +205,10 @@ const copyManager = (() => {
         ], { duration: 500 });
     };
 
-    const generateSOQL = async (sObjectName) => {  // 接收明确参数
+    const generateSOQL = async (sObjectName) => {
         try {
             if (!sObjectName || sObjectName === 'UnknownObject') {
-                toastManager.show('⚠️ 无效的对象名称');
+                toastManager.show('⚠️ Invalid object name');
                 return;
             }
 
@@ -223,19 +223,19 @@ const copyManager = (() => {
             ).join(', ')} FROM ${sObjectName}`;
 
             await writeToClipboard(soql);
-            toastManager.show(`✅ SOQL已生成:\n${utils.truncateText(soql, 45)}`);
+            toastManager.show(`✅ SOQL generated:\n${utils.truncateText(soql, 45)}`);
         } catch (err) {
-            console.error('SOQL生成失败:', err);
-            toastManager.show('❌ 复制失败，请重试');
+            console.error('SOQL generation failed:', err);
+            toastManager.show('❌ Copy failed, please try again');
         }
     };
 
     const writeToClipboard = async (text) => {
         try {
-            // 方法1：优先使用现代API
+            // Method 1: Prefer modern API
             await navigator.clipboard.writeText(text);
         } catch (err) {
-            // 方法2：降级方案
+            // Method 2: Fallback solution
             const textarea = document.createElement('textarea');
             textarea.value = text;
             textarea.style.position = 'fixed';
@@ -249,8 +249,6 @@ const copyManager = (() => {
             }
         }
     };
-
-    // const formatField = (field) => field.includes(' ') ? `"${field}"` : field;
 
     const updateMultiCopyState = () => {
         const text = state.multiItems.join(', ');
@@ -267,7 +265,7 @@ const copyManager = (() => {
     return { init, handleCopy, resetState };
 })();
 
-// ==================== DOM 工具 ====================
+// ==================== DOM Utilities ====================
 const domHelper = {
     createElement: (tag, config) => {
         const el = document.createElement(tag);
@@ -311,7 +309,7 @@ const domHelper = {
     }
 };
 
-// ==================== 工具函数 ====================
+// ==================== Utility Functions ====================
 const utils = {
     escapeHtml: (str) => str.replace(/</g, '&lt;').replace(/>/g, '&gt;'),
 
@@ -331,7 +329,7 @@ const utils = {
     }
 };
 
-// ==================== 主逻辑 ====================
+// ==================== Main Logic ====================
 const apiNameManager = (() => {
     const processFields = (selector, filter, labelExtractor, labelMap) => {
         const elements = document.querySelectorAll(selector);
@@ -393,17 +391,16 @@ const apiNameManager = (() => {
 
     const handleMessage = (message) => {
         if (message.command === 'showApiName') {
-            copyManager.init(message.sObjectName); // 初始化名称存储
+            copyManager.init(message.sObjectName); // Initialize name storage
             toggleDisplay({
                 isLightning: message.isLightningMode,
-                sObjectName: message.sObjectName, // 直接传递
+                sObjectName: message.sObjectName,
                 labelMap: message.labelMap,
                 longId: message.longId
             });
         }
     };
 
-    // 保持参数结构一致
     const toggleDisplay = ({ isLightning, sObjectName, labelMap, longId }) => {
         if (utils.isAPINameVisible()) {
             utils.removeAllApiElements();
@@ -446,5 +443,5 @@ const apiNameManager = (() => {
     return { init };
 })();
 
-// ==================== 初始化 ====================
+// ==================== Initialization ====================
 apiNameManager.init();
