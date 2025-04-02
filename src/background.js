@@ -83,55 +83,51 @@ function getLongId(originalId) {
 }
 
 async function showApiName(tab) {
-    try {
-        const url = new URL(tab.url);
-        const isLightning = url.host.includes('lightning.force.com');
+    const url = new URL(tab.url);
+    const isLightning = url.host.includes('lightning.force.com');
 
-        let sid, domain;
-        if (isLightning) {
-            const customDomain = url.host.split('.')[0];
-            [sid, domain] = await getTokenAndDomainInLightning(customDomain);
-        } else {
-            [sid, domain] = await getTokenAndDomainInClassic(url.origin);
-        }
-
-        if (!sid) return;
-
-        const headers = {
-            'Authorization': `Bearer ${sid}`,
-            'Content-Type': 'application/json'
-        };
-
-        const apiHost = `https://${isLightning ? domain : url.host}`;
-        const pathSegments = url.pathname.split('/');
-
-        let sObjectId, sObjectName;
-        if (isLightning) {
-            const match = url.pathname.match(/\/lightning\/r\/(\w+)\/(\w+)/);
-            if (!match) return;
-            sObjectName = match[1];
-            sObjectId = match[2];
-        } else {
-            sObjectId = pathSegments[1]?.substring(0, 15);
-            const keyPrefix = pathSegments[1]?.substring(0, 3);
-            sObjectName = await getSObjectName(apiHost, headers, keyPrefix);
-        }
-
-        if (!sObjectName || !sObjectId) return;
-
-        const labelMap = await getLabelMap(apiHost, sObjectName, sObjectId, headers);
-        const longId = getLongId(sObjectId);
-
-        await chrome.tabs.sendMessage(tab.id, {
-            command: "showApiName",
-            isLightningMode: isLightning,
-            labelMap,
-            sObjectName,
-            longId
-        });
-    } catch (error) {
-        console.error('Error in showApiName:', error);
+    let sid, domain;
+    if (isLightning) {
+        const customDomain = url.host.split('.')[0];
+        [sid, domain] = await getTokenAndDomainInLightning(customDomain);
+    } else {
+        [sid, domain] = await getTokenAndDomainInClassic(url.origin);
     }
+
+    if (!sid) return;
+
+    const headers = {
+        'Authorization': `Bearer ${sid}`,
+        'Content-Type': 'application/json'
+    };
+
+    const apiHost = `https://${isLightning ? domain : url.host}`;
+    const pathSegments = url.pathname.split('/');
+
+    let sObjectId, sObjectName;
+    if (isLightning) {
+        const match = url.pathname.match(/\/lightning\/r\/(\w+)\/(\w+)/);
+        if (!match) return;
+        sObjectName = match[1];
+        sObjectId = match[2];
+    } else {
+        sObjectId = pathSegments[1]?.substring(0, 15);
+        const keyPrefix = pathSegments[1]?.substring(0, 3);
+        sObjectName = await getSObjectName(apiHost, headers, keyPrefix);
+    }
+
+    if (!sObjectName || !sObjectId) return;
+
+    const labelMap = await getLabelMap(apiHost, sObjectName, sObjectId, headers);
+    const longId = getLongId(sObjectId);
+
+    await chrome.tabs.sendMessage(tab.id, {
+        command: "showApiName",
+        isLightningMode: isLightning,
+        labelMap,
+        sObjectName,
+        longId
+    });
 }
 
 // Event Listeners
