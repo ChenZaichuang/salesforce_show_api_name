@@ -14,8 +14,8 @@ const SELECTORS = {
 
 const STYLE_CONFIG = {
     TOAST: {
-        MAX_WIDTH: 300,
-        LINE_MAX_LENGTH: 35
+        MAX_WIDTH: 1500,
+        LINE_MAX_LENGTH: 175
     },
     BUTTON: {
         SIZE: 18,
@@ -223,7 +223,7 @@ const copyManager = (() => {
             ).join(', ')} FROM ${sObjectName}`;
 
             await writeToClipboard(soql);
-            toastManager.show(`✅ SOQL generated:\n${utils.truncateText(soql, 45)}`);
+            toastManager.show(`✅ SOQL generated:\n${utils.truncateText(soql, STYLE_CONFIG.TOAST.LINE_MAX_LENGTH)}`);
         } catch (err) {
             console.error('SOQL generation failed:', err);
             toastManager.show('❌ Copy failed, please try again');
@@ -253,7 +253,7 @@ const copyManager = (() => {
     const updateMultiCopyState = () => {
         const text = state.multiItems.join(', ');
         navigator.clipboard.writeText(text);
-        toastManager.show(`Multi selection:\n${utils.truncateText(text)}`);
+        toastManager.show(`Multi selection:\n${utils.truncateText(text, STYLE_CONFIG.TOAST.LINE_MAX_LENGTH)}`);
     };
 
     const resetState = () => {
