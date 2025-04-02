@@ -38,7 +38,8 @@
   "permissions": [
     "activeTab",
     "cookies",
-    "clipboardWrite"
+    "clipboardWrite",
+    "storage"
   ],
   "host_permissions": [
     "https://*.force.com/*",
