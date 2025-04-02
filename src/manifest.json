@@ -1,22 +1,19 @@
 {
   "name": "Salesforce Show Api Name",
   "version": "1.2.1",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "description": "Display Field & Object API Names on Detail Pages (LEX & Classic).",
   "homepage_url": "https://github.com/ChenZaichuang/salesforce_show_api_name",
   "background": {
-    "scripts": [
-      "background.js"
-    ]
+    "service_worker": "background.js"
   },
-  "icons":
-  {
+  "icons": {
     "16": "images/16.png",
     "32": "images/32.png",
     "48": "images/48.png",
     "128": "images/128.png"
   },
-  "browser_action": {
+  "action": {
     "default_icon": {
       "16": "images/16.png",
       "32": "images/32.png",
@@ -40,7 +37,9 @@
   ],
   "permissions": [
     "activeTab",
-    "cookies",
+    "cookies"
+  ],
+  "host_permissions": [
     "https://*.force.com/*",
     "https://*.salesforce.com/*"
   ],
